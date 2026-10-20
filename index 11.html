@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Treinamento SDR/BDR - Bertolini Sistemas de Armazenagem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --azul: #06418a;
+        --azul-dark: #032552;
+        --laranja: #f8820a;
+        --laranja-light: #ff9e3b;
+        --card: rgba(255, 255, 255, 0.95);
+        --texto: #1f2937;
+        --muted: #6b7280;
+        --radius: 12px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", Arial, sans-serif;
+      }
+      body {
+        background-image: url("https://www.bertolini.com.br/uploads/knsc8mg2fl1exd28124z.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: var(--texto);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(3, 37, 82, 0.92), rgba(6, 65, 138, 0.85));
+        z-index: -2;
+      }
+      #matrixCanvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        opacity: 0.35;
+      }
+      header {
+        background: rgba(3, 37, 82, 0.95);
+        color: #fff;
+        padding: 14px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 4px solid var(--laranja);
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+      }
+      .header-title h1 {
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .header-title .autor {
+        font-size: 13px;
+        color: #fff;
+        font-weight: 700;
+        margin-top: 5px;
+      }
+      .header-title .subtitulo {
+        font-size: 13px;
+        color: var(--laranja-light);
+        font-weight: 600;
+        margin-top: 3px;
+      }
+      .header-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .profile-text {
+        text-align: right;
+      }
+      .profile-text strong {
+        display: block;
+        font-size: 13px;
+      }
+      .profile-text span {
+        font-size: 11px;
+        color: #cbd5e1;
+      }
+      .header-photo {
+        background: #fff;
+        padding: 4px;
+        border-radius: 50%;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        display: flex;
+      }
+      .header-photo img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--laranja);
+      }
+      .wrapper {
+        max-width: 1600px;
+        margin: 30px auto;
+        padding: 0 20px;
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+      }
+      .side-panel {
+        width: 270px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: sticky;
+        top: 110px;
+      }
+      .panel-title {
+        background: var(--azul-dark);
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        border-left: 4px solid var(--laranja);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        text-align: center;
+      }
+      .product-card {
+        background: var(--card);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        border-top: 4px solid var(--laranja);
+        transition: 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(248, 130, 10, 0.35);
+      }
+      .product-card-img-wrapper {
+        height: 140px;
+        overflow: hidden;
+      }
+      .product-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: 0.5s;
+      }
+      .product-card:hover img {
+        transform: scale(1.08);
+      }
+      .product-info {
+        padding: 12px 14px;
+      }
+      .product-info h3 {
+        font-size: 14px;
+        color: var(--azul);
+        margin-bottom: 4px;
+      }
+      .product-info p {
+        font-size: 11.5px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .product-tag {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--laranja);
+        background: rgba(248, 130, 10, 0.1);
+        padding: 3px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+      .container {
+        flex-grow: 1;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        border-top: 4px solid var(--laranja);
+        height: fit-content;
+      }
+      .card-span-2 {
+        grid-column: span 2;
+      }
+      .card h2 {
+        color: var(--azul);
+        font-size: 18px;
+        margin-bottom: 14px;
+        border-bottom: 2px solid rgba(248, 130, 10, 0.3);
+        padding-bottom: 8px;
+      }
+      .fluxo {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+        margin: 18px 0;
+      }
+      .etapa {
+        background: var(--azul);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        border-bottom: 3px solid var(--laranja);
+      }
+      .arrow {
+        color: var(--laranja);
+        font-weight: bold;
+      }
+      .regra,
+      .alerta,
+      .erro {
+        padding: 14px;
+        margin-top: 12px;
+        font-size: 13.5px;
+        border-radius: 0 8px 8px 0;
+        line-height: 1.5;
+      }
+      .regra {
+        background: #eef6ff;
+        border-left: 5px solid var(--azul);
+        color: #1e3a8a;
+      }
+      .alerta {
+        background: #fff8f0;
+        border-left: 5px solid var(--laranja);
+        color: #9a3412;
+      }
+      .erro {
+        background: #fef2f2;
+        border-left: 5px solid #ef4444;
+        color: #991b1b;
+      }
+      ul {
+        margin-left: 18px;
+        font-size: 13.5px;
+      }
+      li {
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+      .pergunta {
+        margin-bottom: 16px;
+        font-size: 13.5px;
+        background: #f8fafc;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+      .pergunta strong {
+        color: var(--azul);
+        display: block;
+        margin-bottom: 8px;
+      }
+      .pergunta label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .pergunta label:hover {
+        color: var(--laranja);
+      }
+      .btn-quiz {
+        background: linear-gradient(135deg, var(--azul), var(--azul-dark));
+        color: #fff;
+        border: 0;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 14px;
+        width: 100%;
+        border-bottom: 3px solid var(--laranja);
+      }
+      .resultado {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13.5px;
+        text-align: center;
+      }
+      .sucesso {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+      .atencao {
+        background: #fffbeb;
+        color: #92400e;
+        border: 1px solid #fde68a;
+      }
+      .quiz-panel {
+        width: 330px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 110px;
+      }
+      .quiz-panel .card {
+        padding: 18px;
+      }
+      .quiz-panel .pergunta {
+        margin-bottom: 12px;
+      }
+      .quiz-panel .pergunta strong {
+        font-size: 12.5px;
+        line-height: 1.35;
+      }
+      .quiz-panel .pergunta label {
+        font-size: 12px;
+        line-height: 1.3;
+      }
+      footer {
+        background: var(--azul-dark);
+        color: #fff;
+        text-align: center;
+        padding: 24px;
+        margin-top: 50px;
+        border-top: 4px solid var(--laranja);
+      }
+      footer p {
+        font-size: 13px;
+        color: #cbd5e1;
+      }
+      @media (max-width: 1300px) {
+        .side-panel {
+          width: 220px;
+        }
+        .container {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .card-span-2 {
+          grid-column: span 2;
+        }
+      }
+      @media (max-width: 1024px) {
+        .wrapper {
+          flex-direction: column;
+        }
+        .side-panel {
+          width: 100%;
+          position: static;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+        .panel-title {
+          grid-column: 1/-1;
+        }
+        .container {
+          grid-template-columns: 1fr;
+          width: 100%;
+        }
+        .card-span-2 {
+          grid-column: span 1;
+        }
+      }
+      @media (max-width: 640px) {
+        header {
+          padding: 14px;
+          gap: 12px;
+        }
+        .header-title h1 {
+          font-size: 19px;
+        }
+        .profile-text {
+          display: none;
+        }
+        .header-photo img {
+          width: 56px;
+          height: 56px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="matrixCanvas"></canvas>
+    <header>
+      <div class="header-title">
+        <h1>Treinamento SDR / BDR</h1>
+        <p class="autor">Elaborado por Diogo Paim Gonçalves</p>
+        <p class="subtitulo">Fluxo de Leads, Conversão e Geração de Oportunidades (OP)</p>
+      </div>
+      <div class="header-profile">
+        <div class="profile-text">
+          <strong>Diogo Paim Gonçalves</strong><span>Desenvolvimento de Negócios</span>
+        </div>
+        <div class="header-photo">
+          <img
+            src="data:image/jpeg;base64,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"
+            alt="Foto de perfil do autor"
+          />
+        </div>
+      </div>
+    </header>
+    <div class="wrapper">
+      <aside class="side-panel">
+        <div class="panel-title">Sistemas Estruturais</div>
+        <div class="product-card">
+          <div class="product-card-img-wrapper">
+            <img
+              src="https://www.bertoliniarmazenagem.com.br/wp-content/uploads/2025/01/Porta-Palete-Bertolini-SIstemas-de-Armazenagem-7-1024x681.webp"
+              alt="Porta Paletes Bertolini"
+            />
+          </div>
+          <div class="product-info">
+            <h3>Porta Paletes</h3>
+            <p>Estrutura estática de acesso direto e versatilidade total.</p>
+            <span class="product-tag">Armazenagem Pesada</span>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-card-img-wrapper">
+            <img
+              src="https://www.bertoliniarmazenagem.com.br/wp-content/uploads/2025/01/Bases-Moveis-Bertolini-3-1024x683.webp"
+              alt="Bases Móveis Bertolini"
+            />
+          </div>
+          <div class="product-info">
+            <h3>Bases Móveis</h3>
+            <p>Máxima densidade e otimização do espaço de estocagem.</p>
+            <span class="product-tag">Sistemas Compactos</span>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-card-img-wrapper">
+            <img
+              src="https://www.bertoliniarmazenagem.com.br/wp-content/uploads/2025/01/Estrutura-para-Miniloads2.webp"
+              alt="Miniloads Bertolini"
+            />
+          </div>
+          <div class="product-info">
+            <h3>Miniloads</h3>
+            <p>Armazenamento e transelevadores de alta velocidade para caixas.</p>
+            <span class="product-tag">Automação WMS</span>
+          </div>
+        </div>
+        <a
+          href="https://www.bertoliniarmazenagem.com.br/produto/dinamico/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="product-card"
+          ><div class="product-card-img-wrapper">
+            <img
+              src="https://www.bertoliniarmazenagem.com.br/wp-content/uploads/2025/01/Porta-Palete-Bertolini-SIstemas-de-Armazenagem-7-1024x681.webp"
+              alt="Sistema Dinâmico Bertolini"
+            />
+          </div>
+          <div class="product-info">
+            <h3>Sistema Dinâmico 🔗</h3>
+            <p>Giro de estoque otimizado com gravidade (Método FIFO).</p>
+            <span class="product-tag">Saiba Mais no Site</span>
+          </div></a
+        >
+      </aside>
+      <main class="container">
+        <div class="card card-span-2">
+          <h2>🎯 Objetivo do Processo</h2>
+          <p style="font-size: 14px; line-height: 1.5">
+            Padronizar a entrada, qualificação e conversão de Leads, garantindo total rastreabilidade da
+            origem, continuidade do pipeline de vendas e mensuração exata das métricas comerciais.
+          </p>
+          <div class="fluxo">
+            <div class="etapa">Lead</div>
+            <div class="arrow">➔</div>
+            <div class="etapa">Qualificação</div>
+            <div class="arrow">➔</div>
+            <div class="etapa">Conversão</div>
+            <div class="arrow">➔</div>
+            <div class="etapa">Conta / Contato</div>
+            <div class="arrow">➔</div>
+            <div class="etapa">Nova OP</div>
+            <div class="arrow">➔</div>
+            <div class="etapa">Follow-up</div>
+          </div>
+          <div class="regra">
+            <strong>Regra de Ouro:</strong> Se a negociação entrou como Lead, permaneça no fluxo até a efetiva
+            Conversão no CRM.
+          </div>
+        </div>
+        <div class="card">
+          <h2>📍 Regra da Origem</h2>
+          <p style="font-size: 13px; color: var(--muted)">
+            A Origem deve registrar fielmente o último ponto de contato que amadureceu o atendimento:
+          </p>
+          <ul style="margin-top: 10px">
+            <li>WhatsApp / Feira / Evento</li>
+            <li>Inbound Marketing / Outbound Active</li>
+            <li>Carteira / Indicação Direct / Reativação</li>
+          </ul>
+          <div class="alerta">
+            <strong>Atenção:</strong> Insira a origem de forma manual na OP até atualização automatizada do
+            CRM.
+          </div>
+        </div>
+        <div class="card">
+          <h2>1️⃣ Passo 1 - Criação do Lead</h2>
+          <ul>
+            <li>Cadastrar o Lead no sistema Força de Vendas.</li>
+            <li>Vincular o SDR/BDR e o Supervisor Regional.</li>
+            <li>Preencher corretamente o campo Origem.</li>
+            <li>Formalizar o início da tratativa via e-mail.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>2️⃣ Passo 2 - Registros em WhatsApp</h2>
+          <p style="font-size: 13px; margin-bottom: 8px">Mantenha todos os registros detalhados no CRM:</p>
+          <ul>
+            <li>Resumo da interação &amp; Status atual.</li>
+            <li>Pendências levantadas &amp; Próxima ação.</li>
+            <li>Responsável designado &amp; Prazo combinado.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>⚠️ Regra Crítica do Pipeline</h2>
+          <div class="regra">
+            ✅ <strong>Fluxo Correto:</strong> Lead ➔ Qualificação ➔ Conversão ➔ Conta/Contato ➔ Nova OP
+          </div>
+          <div class="erro">
+            ❌ <strong>Prática Incorreta:</strong> Lead ativo ➔ Geração direta de Oportunidade sem conversão
+            prévia
+          </div>
+        </div>
+        <div class="card">
+          <h2>🏢 Conta e Contato Existente</h2>
+          <p style="font-size: 13px; line-height: 1.4">
+            Mesmo que a empresa ou contato já possua cadastro ativo, novos projetos originados por SDR/BDR
+            obrigatoriamente iniciam como Lead.
+          </p>
+          <div class="regra">
+            <strong>Conta/Contato:</strong> Manutenção de histórico e cadastro.<br /><strong
+              >Lead + OP:</strong
+            >
+            Mensuração justa de performance do SDR/BDR.
+          </div>
+        </div>
+        <div class="card">
+          <h2>✅ Checklist do Processo</h2>
+          <ul>
+            <li>Origem cadastrada corretamente?</li>
+            <li>Interação documentada no CRM?</li>
+            <li>Próxima etapa e prazo estabelecidos?</li>
+            <li>Lead convertido antes da geração da OP?</li>
+          </ul>
+        </div>
+      </main>
+      <aside class="quiz-panel">
+        <div class="panel-title">Quiz de Avaliação</div>
+        <div class="card">
+          <div class="pergunta">
+            <strong>1. Um Lead em andamento evoluiu para negociação. Qual a conduta exata?</strong
+            ><label><input type="radio" name="q1" value="0" /> Criar uma Oportunidade diretamente</label
+            ><label><input type="radio" name="q1" value="1" /> Converter o Lead e depois gerar a OP</label>
+          </div>
+          <div class="pergunta">
+            <strong>2. Cliente antigo reativa contato via SDR. Como proceder no CRM?</strong
+            ><label><input type="radio" name="q2" value="0" /> Pular a etapa de Lead e ir para OP</label
+            ><label
+              ><input type="radio" name="q2" value="1" /> Tratar como Lead e seguir o pipeline integral</label
+            >
+          </div>
+          <div class="pergunta">
+            <strong>3. Qual campo garante a rastreabilidade comercial do atendimento?</strong
+            ><label><input type="radio" name="q3" value="1" /> Campo Origem</label
+            ><label><input type="radio" name="q3" value="0" /> Nome da empresa</label>
+          </div>
+          <div class="pergunta">
+            <strong>4. O que deve ser registrado no CRM após cada interação?</strong
+            ><label><input type="radio" name="q4" value="1" /> Status atual, pendências e próxima ação</label
+            ><label><input type="radio" name="q4" value="0" /> Apenas telefone e e-mail</label>
+          </div>
+          <div class="pergunta">
+            <strong>5. Quando a nova Oportunidade deve ser criada?</strong
+            ><label><input type="radio" name="q5" value="1" /> Após a conversão do Lead</label
+            ><label><input type="radio" name="q5" value="0" /> Antes da conversão do Lead</label>
+          </div>
+          <button type="button" class="btn-quiz" onclick="corrigirQuiz()">Validar Respostas</button>
+          <div id="resultado" class="resultado" style="display: none"></div>
+        </div>
+      </aside>
+    </div>
+    <footer><p>Treinamento de SDR/BDR • CRM Força de Vendas • Bertolini Sistemas de Armazenagem</p></footer>
+    <script>
+      const canvas = document.getElementById("matrixCanvas"),
+        ctx = canvas.getContext("2d");
+      let rainDrops = [];
+      const chars = "BERTOLINI0123456789SDRBDRCRM",
+        fontSize = 13;
+      function resizeCanvas() {
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+        rainDrops = Array(Math.floor(canvas.width / fontSize)).fill(1);
+      }
+      resizeCanvas();
+      addEventListener("resize", resizeCanvas);
+      function drawMatrix() {
+        ctx.fillStyle = "rgba(3,37,82,.16)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < rainDrops.length; i++) {
+          const text = chars.charAt(Math.floor(Math.random() * chars.length)),
+            rand = Math.random();
+          ctx.fillStyle = rand > 0.85 ? "#ff9e3b" : rand > 0.5 ? "#f8820a" : "#4182d6";
+          ctx.font = fontSize + "px monospace";
+          ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+          if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) rainDrops[i] = 0;
+          rainDrops[i]++;
+        }
+      }
+      setInterval(drawMatrix, 38);
+      function corrigirQuiz() {
+        const respostas = [1, 2, 3, 4, 5].map(
+            (n) => document.querySelector(`input[name="q${n}"]:checked`)?.value,
+          ),
+          res = document.getElementById("resultado");
+        res.style.display = "block";
+        if (respostas.some((v) => v === undefined)) {
+          res.className = "resultado atencao";
+          res.innerHTML = "⚠️ Por favor, selecione uma opção em todas as 5 perguntas.";
+          return;
+        }
+        const acertos = respostas.filter((v) => v === "1").length;
+        if (acertos === 5) {
+          res.className = "resultado sucesso";
+          res.innerHTML = "🎉 Parabéns! Você acertou 5 de 5 perguntas (100%).";
+        } else {
+          res.className = "resultado atencao";
+          res.innerHTML = `⚠️ Você acertou ${acertos} de 5 perguntas. Revise as diretrizes do fluxo comercial.`;
+        }
+      }
+    </script>
+  </body>
+</html>
